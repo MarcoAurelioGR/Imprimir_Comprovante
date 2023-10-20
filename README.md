@@ -1,7 +1,7 @@
 ###  A partir das bibliotecas Win32Print e Google API Client, que podem ser instaladas com: 
 
 <code> 
-pip install pywin32\n
+pip install pywin32
 pip install google-api-python-client
 </code>
 
