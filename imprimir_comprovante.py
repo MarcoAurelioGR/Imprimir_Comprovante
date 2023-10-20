@@ -126,7 +126,6 @@ def search_passageiro(poltronas, passageiro):
 
 if __name__ == '__main__':
 
-    caminho = r"C:\Users\ianny\Impressora\Arquivos"
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
     ID_SHEET = '18gFtSlvIGT3LDc4SoMHt0mgXuXiMH8v7r0OAEvP_cGY'
 
