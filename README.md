@@ -1,9 +1,7 @@
 ###  A partir das bibliotecas Win32Print e Google API Client, que podem ser instaladas com: 
-
-<code> 
-  pip install pywin32
-  pip install google-api-python-client
-</code>
+ 
+<code>pip install pywin32</code>
+<code>pip install google-api-python-client</code>
 
 ### Pude criar um código que pode acessar os dados de uma planilha no Google Planilhas, através de uma API do Google que acessa o Google Drive, e crio um documento que substituiu alguns termos para dados equivalentes na planilha.
 ### Segue lista de termos que foram substituídos no código:
