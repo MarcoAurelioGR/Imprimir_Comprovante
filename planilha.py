@@ -4,6 +4,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
+import tkinter as tk
+
 def credentials(SCOPES):
     creds = None
 
@@ -37,7 +39,28 @@ def getSheet(SCOPES, ID_SHEET):
         return values
 
     except:
-        print("\nTentando reconectar...\n")
+        os.remove("token.json")      
+        popup_reconectar()
 
-        os.remove("token.json")
-        getSheet(SCOPES, ID_SHEET)
+        return getSheet(SCOPES, ID_SHEET)
+        
+def popup_reconectar(root=None):
+    popup = tk.Tk()
+
+    popup.geometry('200x125')
+    popup.title("Reconectando")
+    popup.iconbitmap("iconRenotur.ico")
+    popup.option_add('*Font', 'Arial 11')
+    popup.option_add('*background', 'white')
+    popup.configure(bg='white')
+    
+
+    # Adicionar uma label e um botão "OK" à janela
+    label = tk.Label(popup, font=("Arial", 11), text="Reconect ao perfil.")
+    label.pack(padx=20, pady=20)
+
+    ok_button = tk.Button(popup, text="OK", font=("Arial", 11), background='#f8ac4c', relief=tk.GROOVE, bd=0, width=10, command=popup.destroy)
+    ok_button.pack(pady=10)
+
+    popup.wait_window()
+

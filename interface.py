@@ -1,7 +1,6 @@
 # Importes para a construção da interface
 import tkinter as tk
 import ttkbootstrap as ttk
-from ttkbootstrap import DateEntry
 
 # Importes para imprimir o comprovante
 from imprimir_comprovante import searchDate, search_passageiro, create_doc, imprimir
@@ -84,7 +83,6 @@ def building_board(text, style_apply=None):
 
     return board
 
-
 if __name__ == '__main__':
     if SHEET is not None:
         root = ttk.Window()
@@ -100,7 +98,7 @@ if __name__ == '__main__':
         date_label = tk.Label(root, text="\nInforme uma data (DD/MM/YYYY):")
         date_label.pack(pady=10)
 
-        date_entry = DateEntry(root, width=18, bootstyle='warning')
+        date_entry = ttk.DateEntry(root, width=18, bootstyle='warning')
         date_entry.pack(padx=10, pady=10)   
 
         date_entry.bind("<FocusIn>", show_passengers)
