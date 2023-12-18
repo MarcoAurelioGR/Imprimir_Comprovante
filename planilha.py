@@ -1,10 +1,18 @@
+# Importes para conectar à planilha no Google Drive
 import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
+# Importe para criar notificações e mensagens de erros
 import tkinter as tk
+
+# Importe para executar funçoes de Sistema Operacional
+import sys
+
+# Importe para a criação da credencial
+from credentials import credentials_exist
 
 def credentials(SCOPES):
     creds = None
@@ -16,12 +24,18 @@ def credentials(SCOPES):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+            try:  
+                if credentials_exist():
+                    tk.messagebox.showinfo("Conectando", "Conecte à um perfil autorizado.")
+                    flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+                    creds = flow.run_local_server(port=0, timeout_seconds=60)
+            except:
+                tk.messagebox.showinfo("Timeout", "Tempo limite de autenticação atingido. O programa será encerrado.")
+                sys.exit()
+
+            
+            with open('token.json', 'w') as token:
+                token.write(creds.to_json())
 
     service = build('sheets', 'v4', credentials=creds)
 
@@ -39,10 +53,11 @@ def getSheet(SCOPES, ID_SHEET):
         return values
 
     except:
-        os.remove("token.json")      
-        popup_reconectar()
+        if os.path.exists('token.json'):
+            os.remove("token.json")      
+            popup_reconectar()
 
-        return getSheet(SCOPES, ID_SHEET)
+            return getSheet(SCOPES, ID_SHEET)
         
 def popup_reconectar(root=None):
     popup = tk.Tk()

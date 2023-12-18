@@ -3,6 +3,11 @@ from docx import Document
 import win32print
 import win32api
 import datetime
+
+# Importe para executar comandos do sistema operacional
+import os
+
+# Importe para exibir mensagens de erro
 from tkinter import messagebox
 
 def getList_impressora():
@@ -19,6 +24,9 @@ def imprimir(impressora, path_doc):
 
 def create_doc(line):
     try:
+        if not os.path.exists('Comprovantes'):
+            os.makedirs('Comprovantes')
+
         comprovante = Document("comprovante.docx")
     
         data_hora_atual = datetime.datetime.now()
@@ -28,10 +36,9 @@ def create_doc(line):
             "CCCC": line[3],
             "NOW": formato_data_hora,
             "DD/MM/YYYY": line[0],
-            "PP": line[1],
+            "PP": f'{line[1] if len(line[1]) == 2 else str(0)+line[1]}',
             "MG-ID.IDI.DID": line[4],
             "FFFF": line[9],
-            "NOW": formato_data_hora,
             "FFFF": line[9],
             "EEEEE": line[6]
         }
@@ -45,8 +52,8 @@ def create_doc(line):
         # formato_data = formato_data_hora.replace(":", "").replace("/", "")
         comprovante.save(f"Comprovantes/{formato_data_viagem} - {line[3]}.docx")
 
-    except:
-       messagebox.showinfo("Erro ao salvar documento.", f"Tente fechar o arquivo {formato_data_viagem} - {line[3]}.docx!")
+    except Exception as e:
+        messagebox.showinfo("Erro ao salvar documento.", f"Erro: {e}")
 
 def searchDate(sheet, date):
     resultSearch = []

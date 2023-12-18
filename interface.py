@@ -17,7 +17,7 @@ passenger_data = None # Inibir a busca duplicada do passageiro.
 
 def building_button(texto, command):
     style.configure("TButton",
-                 width=20,
+                 width=21,
                  padding=5,
                  font=("Arial", 11))
 
@@ -25,6 +25,18 @@ def building_button(texto, command):
     button.pack(pady=10)
 
     return button
+
+def building_board(text, style_apply=None):
+    frame = ttk.Frame(root, width=10, style='TFrame')
+    frame.pack(expand=tk.NO, fill=tk.NONE)
+
+    style.configure('TFrame', background='white')
+    style.configure(style_apply, background='white', foreground='azure4', anchor='center', padding=(50,0))
+
+    board = ttk.Label(frame, style=style_apply, text=text)
+    board.pack(pady=10)
+
+    return board
 
 def show_passengers(event=None):
     selected_date = date_entry.entry.get()
@@ -42,6 +54,7 @@ def show_passengers(event=None):
     else:
         passenger_combobox.set('Selecione um passageiro')
         passenger_combobox['values'] = []
+        
 
 
 def update_board(event=None):
@@ -60,36 +73,25 @@ def update_board(event=None):
     else:
         passenger_info_label.config(text="\n\n\nSelecione um passageiro.\n\n\n")
 
+def show_impressoras():
+    if not impressora_combobox['values']:
+        impressora_combobox['values'] = ['Selecione uma impressora'] + getList_impressora()
+        impressora_combobox.set('Selecione uma impressora')
+
 def print_passenger_receipt():
     global passenger_data
 
     impressora = impressora_combobox.get()
 
-    if impressora != 'Selecione uma impressora':
+    if impressora != 'Selecione uma impressora' and passenger_data != 'Selecione um passageiro' and passenger_data:
         formato_data_viagem = passenger_data[0].replace("/",".")
         nome_arquivo = f"{formato_data_viagem} - {passenger_data[3]}.docx"
         path_doc = os.path.abspath(os.path.join("Comprovantes", nome_arquivo))
 
         create_doc(passenger_data)
         imprimir(impressora, path_doc)
-
-def show_impressoras():
-    if not impressora_combobox['values']:
-        impressora_combobox['values'] = ['Selecione uma impressora'] + getList_impressora()
-        impressora_combobox.set('Selecione uma impressora')
-
-
-def building_board(text, style_apply=None):
-    frame = ttk.Frame(root, width=10, style='TFrame')
-    frame.pack(expand=tk.NO, fill=tk.NONE)
-
-    style.configure('TFrame', background='white')
-    style.configure(style_apply, background='white', foreground='azure4', anchor='center', padding=(50,0))
-
-    board = ttk.Label(frame, style=style_apply, text=text)
-    board.pack(pady=10)
-
-    return board
+    else:
+        tk.messagebox.showinfo("Erro", "Tente selecionar um passageiro e uma impressora.")
 
 if __name__ == '__main__':
     if SHEET is not None:
