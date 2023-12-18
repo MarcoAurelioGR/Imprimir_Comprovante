@@ -3,7 +3,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 
 # Importes para imprimir o comprovante
-from imprimir_comprovante import searchDate, search_passageiro, create_doc, imprimir
+from imprimir_comprovante import searchDate, search_passageiro, create_doc, getList_impressora, imprimir
 import os
 
 # Importe para acessar a planilha do Google Drive
@@ -14,6 +14,17 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 ID_SHEET = '18gFtSlvIGT3LDc4SoMHt0mgXuXiMH8v7r0OAEvP_cGY'
 SHEET = getSheet(SCOPES, ID_SHEET)
 passenger_data = None # Inibir a busca duplicada do passageiro.
+
+def building_button(texto, command):
+    style.configure("TButton",
+                 width=20,
+                 padding=5,
+                 font=("Arial", 11))
+
+    button = ttk.Button(root, text=texto, bootstyle='warning', command=eval(command))
+    button.pack(pady=10)
+
+    return button
 
 def show_passengers(event=None):
     selected_date = date_entry.entry.get()
@@ -52,23 +63,20 @@ def update_board(event=None):
 def print_passenger_receipt():
     global passenger_data
 
-    formato_data_viagem = passenger_data[0].replace("/",".")
-    nome_arquivo = f"{formato_data_viagem} - {passenger_data[3]}.docx"
-    path_doc = os.path.abspath(os.path.join("Comprovantes", nome_arquivo))
+    impressora = impressora_combobox.get()
 
-    create_doc(passenger_data)
-    imprimir(path_doc)
+    if impressora != 'Selecione uma impressora':
+        formato_data_viagem = passenger_data[0].replace("/",".")
+        nome_arquivo = f"{formato_data_viagem} - {passenger_data[3]}.docx"
+        path_doc = os.path.abspath(os.path.join("Comprovantes", nome_arquivo))
 
-def building_button(texto, command):
-    style.configure("TButton",
-                 width=20,
-                 padding=5,
-                 font=("Arial", 11))
+        create_doc(passenger_data)
+        imprimir(impressora, path_doc)
 
-    button = ttk.Button(root, text=texto, bootstyle='warning', command=eval(command))
-    button.pack(pady=10)
-
-    return button
+def show_impressoras():
+    if not impressora_combobox['values']:
+        impressora_combobox['values'] = ['Selecione uma impressora'] + getList_impressora()
+        impressora_combobox.set('Selecione uma impressora')
 
 
 def building_board(text, style_apply=None):
@@ -88,7 +96,7 @@ if __name__ == '__main__':
         root = ttk.Window()
         style = ttk.Style()
         
-        root.geometry('500x425')
+        root.geometry('500x500')
         root.title("Renotur ")
         root.iconbitmap("iconRenotur.ico")
         root.option_add('*Font', 'Arial 11')
@@ -112,6 +120,10 @@ if __name__ == '__main__':
 
         passenger_info_label = building_board("\n\n\nInforme uma data.\n\n\n", 'TLabel')
         show_passengers()
+
+        impressora_combobox = ttk.Combobox(root, bootstyle='warning')
+        impressora_combobox.pack(pady=10) 
+        show_impressoras()
 
         print_button = building_button("Imprimir", "print_passenger_receipt")
 

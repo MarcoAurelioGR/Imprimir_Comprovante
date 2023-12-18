@@ -5,12 +5,16 @@ import win32api
 import datetime
 from tkinter import messagebox
 
-def imprimir(path_doc):
-    lista_impressoras = win32print.EnumPrinters(2)
-    impressora = lista_impressoras[1] # Ianny: 1
-    print(f'\n\n{impressora}')
+def getList_impressora():
+    lista_impressoras = []
 
-    win32print.SetDefaultPrinter(impressora[2])
+    for impressora in win32print.EnumPrinters(2):
+        lista_impressoras.append(impressora[2])
+
+    return lista_impressoras
+
+def imprimir(impressora, path_doc):
+    win32print.SetDefaultPrinter(impressora)
     win32api.ShellExecute(0,"print",path_doc,None,path_doc,0)
 
 def create_doc(line):
