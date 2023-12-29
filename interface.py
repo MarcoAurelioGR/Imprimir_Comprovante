@@ -12,8 +12,7 @@ from planilha import getSheet
 # Inicializações para o programa
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 ID_SHEET = '18gFtSlvIGT3LDc4SoMHt0mgXuXiMH8v7r0OAEvP_cGY'
-SHEET = getSheet(SCOPES, ID_SHEET)
-passenger_data = None # Inibir a busca duplicada do passageiro.
+passenger = None # Inibir a busca duplicada do passageiro.
 
 def building_button(texto, command):
     style.configure("TButton",
@@ -39,39 +38,45 @@ def building_board(text, style_apply=None):
     return board
 
 def show_passengers(event=None):
+    global passenger
+
     selected_date = date_entry.entry.get()
-    viagem = searchDate(SHEET, selected_date)
+    selected_bus = bus_selection.get()
+    viagem = searchDate(SHEET, selected_date, selected_bus)
 
     style.configure('TLabel', foreground='black')
 
     if viagem:
-        passengers = ['Selecione um passageiro'] + [f'{passenger[1] if len(passenger[1]) == 2 else str(0)+passenger[1]} - {passenger[3]}' for passenger in viagem]
+        passengers = ['Selecione um passageiro'] + [f'{passenger[2] if len(passenger[2]) == 2 else str(0)+passenger[2]} - {passenger[4]}' for passenger in viagem]
 
         passenger_combobox['values'] = passengers
         passenger_combobox.set('Selecione um passageiro')
-        update_board()
 
     else:
         passenger_combobox.set('Selecione um passageiro')
         passenger_combobox['values'] = []
+
+        passenger = None
         
+    update_board()
 
 
 def update_board(event=None):
-    global passenger_data
+    global passenger
 
     selected_date = date_entry.entry.get()
+    selected_bus = bus_selection.get()
     selected_passenger = passenger_combobox.get()[5:]
 
-    viagem = searchDate(SHEET, selected_date)
-    passenger_data = search_passageiro(viagem, selected_passenger)
+    viagem = searchDate(SHEET, selected_date, selected_bus)
+    passenger = search_passageiro(viagem, selected_bus, selected_passenger)
 
     # Atualizar a interface com os dados do passageiro, por exemplo, exibindo em um Label
-    if passenger_data:
-        comprovante = f"\nNome: {passenger_data[3]}\nData da Viagem: {passenger_data[0]}\nPoltrona: {passenger_data[1] if len(passenger_data[1]) == 2 else str(0)+passenger_data[1]}\nEmbarque: {passenger_data[6]}\nForma de pagamento: {passenger_data[9]}\n"
+    if passenger:
+        comprovante = f"\nNome: {passenger[4]}\nData da Viagem: {passenger[0]}\nPoltrona: {passenger[2] if len(passenger[2]) == 2 else str(0)+passenger[2]}\nEmbarque: {passenger[7]}\nForma de pagamento: {passenger[10]}\n"
         passenger_info_label.config(text=comprovante)
     else:
-        passenger_info_label.config(text="\n\n\nSelecione um passageiro.\n\n\n")
+        passenger_info_label.config(text="\n\n\nSelecione a data da viagem, o ônibus e o passageiro.\n\n\n")
 
 def show_impressoras():
     if not impressora_combobox['values']:
@@ -79,33 +84,35 @@ def show_impressoras():
         impressora_combobox.set('Selecione uma impressora')
 
 def print_passenger_receipt():
-    global passenger_data
+    global passenger
 
     impressora = impressora_combobox.get()
 
-    if impressora != 'Selecione uma impressora' and passenger_data != 'Selecione um passageiro' and passenger_data:
-        formato_data_viagem = passenger_data[0].replace("/",".")
-        nome_arquivo = f"{formato_data_viagem} - {passenger_data[3]}.docx"
+    if impressora != 'Selecione uma impressora' and passenger != 'Selecione um passageiro' and passenger:
+        formato_data_viagem = passenger[0].replace("/",".")
+        nome_arquivo = f"{formato_data_viagem} - {passenger[4]}.docx"
         path_doc = os.path.abspath(os.path.join("Comprovantes", nome_arquivo))
 
-        create_doc(passenger_data)
+        create_doc(passenger)
         imprimir(impressora, path_doc)
     else:
         tk.messagebox.showinfo("Erro", "Tente selecionar um passageiro e uma impressora.")
 
 if __name__ == '__main__':
+    SHEET = getSheet(SCOPES, ID_SHEET) # Permitir alteracao durante execucao
+
     if SHEET is not None:
         root = ttk.Window()
         style = ttk.Style()
         
-        root.geometry('500x500')
+        root.geometry('550x550')
         root.title("Renotur ")
         root.iconbitmap("iconRenotur.ico")
         root.option_add('*Font', 'Arial 11')
         root.option_add('*background', 'white')
         root.configure(bg='white')
 
-        date_label = tk.Label(root, text="\nInforme uma data (DD/MM/YYYY):")
+        date_label = tk.Label(root, text="\nInforme a data da viagem:")
         date_label.pack(pady=10)
 
         date_entry = ttk.DateEntry(root, width=18, bootstyle='warning')
@@ -117,18 +124,27 @@ if __name__ == '__main__':
                         width=20,
                         padding=5,)
 
+        bus_selection = ttk.Combobox(root, bootstyle='warning')
+        bus_selection.pack(pady=10) 
+
+        bus_selection['values'] = ['Selecione um ônibus do dia'] + ["Ônibus 1"] + ["Ônibus 2"] + ["Ônibus 3"] + ["Ônibus 4"]
+        bus_selection.set('Selecione um ônibus do dia')
+
+        bus_selection.bind("<<ComboboxSelected>>", show_passengers)
+
         passenger_combobox = ttk.Combobox(root, bootstyle='warning')
         passenger_combobox.pack(pady=10) 
+        
+        passenger_combobox.bind('<<ComboboxSelected>>', update_board)
 
-        passenger_info_label = building_board("\n\n\nInforme uma data.\n\n\n", 'TLabel')
+        passenger_info_label = building_board("\n\n\nSelecione a data da viagem, o ônibus e o passageiro.\n\n\n", 'TLabel')
         show_passengers()
 
         impressora_combobox = ttk.Combobox(root, bootstyle='warning')
         impressora_combobox.pack(pady=10) 
         show_impressoras()
+        
 
         print_button = building_button("Imprimir", "print_passenger_receipt")
-
-        passenger_combobox.bind('<<ComboboxSelected>>', update_board)
 
         root.mainloop()

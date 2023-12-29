@@ -33,14 +33,14 @@ def create_doc(line):
         formato_data_hora = data_hora_atual.strftime("%d/%m/%Y %H:%M:%S")
 
         dados = {
-            "CCCC": line[3],
+            "CCCC": line[4],
             "NOW": formato_data_hora,
             "DD/MM/YYYY": line[0],
-            "PP": f'{line[1] if len(line[1]) == 2 else str(0)+line[1]}',
+            "PP": f'{line[2] if len(line[2]) == 2 else str(0)+line[2]}',
             "MG-ID.IDI.DID": line[4],
-            "FFFF": line[9],
-            "FFFF": line[9],
-            "EEEEE": line[6]
+            "FFFF": line[10],
+            "FFFF": line[10],
+            "EEEEE": line[7]
         }
 
         for paragrafo in comprovante.paragraphs:
@@ -50,25 +50,25 @@ def create_doc(line):
 
         formato_data_viagem = line[0].replace("/",".")
         # formato_data = formato_data_hora.replace(":", "").replace("/", "")
-        comprovante.save(f"Comprovantes/{formato_data_viagem} - {line[3]}.docx")
+        comprovante.save(f"Comprovantes/{formato_data_viagem} - {line[4]}.docx")
 
     except Exception as e:
         messagebox.showinfo("Erro ao salvar documento.", f"Erro: {e}")
 
-def searchDate(sheet, date):
+def searchDate(sheet, date, bus):
     resultSearch = []
 
     for line in sheet:
-        if line != [] and line[0] == date:
+        if line != [] and line[0] == date and line[1] == bus:
             resultSearch.append(line)
             
-    resultSearch = sorted(resultSearch, key=lambda x: int(x[1])) # Organizado pela ordem das poltronas.
+    resultSearch = sorted(resultSearch, key=lambda x: int(x[2])) # Organizado pela ordem das poltronas.
 
     return resultSearch
 
-def search_passageiro(poltronas, passageiro):
+def search_passageiro(poltronas, bus_selection, passageiro):
     for poltrona in poltronas:
-        if poltrona[1] == passageiro or passageiro.upper() in poltrona[3]:
+        if bus_selection == poltrona[1] and passageiro.upper() in poltrona[4].upper():
             return poltrona
     return None    
 
