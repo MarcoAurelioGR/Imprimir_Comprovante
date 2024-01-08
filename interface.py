@@ -12,6 +12,7 @@ from planilha import getSheet
 # Inicializações para o programa
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 ID_SHEET = '18gFtSlvIGT3LDc4SoMHt0mgXuXiMH8v7r0OAEvP_cGY'
+sheet = getSheet(SCOPES, ID_SHEET) # Variavel que permite alteracao durante execucao.
 passenger = None # Inibir a busca duplicada do passageiro.
 
 def building_button(texto, command):
@@ -39,10 +40,13 @@ def building_board(text, style_apply=None):
 
 def show_passengers(event=None):
     global passenger
+    global sheet
+
+    sheet = getSheet(SCOPES, ID_SHEET) # Permitir alteracao durante execucao.
 
     selected_date = date_entry.entry.get()
     selected_bus = bus_selection.get()
-    viagem = searchDate(SHEET, selected_date, selected_bus)
+    viagem = searchDate(sheet, selected_date, selected_bus)
 
     style.configure('TLabel', foreground='black')
 
@@ -60,7 +64,6 @@ def show_passengers(event=None):
         
     update_board()
 
-
 def update_board(event=None):
     global passenger
 
@@ -68,7 +71,7 @@ def update_board(event=None):
     selected_bus = bus_selection.get()
     selected_passenger = passenger_combobox.get()[5:]
 
-    viagem = searchDate(SHEET, selected_date, selected_bus)
+    viagem = searchDate(sheet, selected_date, selected_bus)
     passenger = search_passageiro(viagem, selected_bus, selected_passenger)
 
     # Atualizar a interface com os dados do passageiro, por exemplo, exibindo em um Label
@@ -77,6 +80,15 @@ def update_board(event=None):
         passenger_info_label.config(text=comprovante)
     else:
         passenger_info_label.config(text="\n\n\nSelecione a data da viagem, o ônibus e o passageiro.\n\n\n")
+
+def refresh_sheet():
+    show_passengers()
+
+    bus_selection.set('Selecione um ônibus do dia')
+    passenger_combobox.set('Selecione um passageiro')
+
+    impressora_combobox['values'] = []
+    show_impressoras()
 
 def show_impressoras():
     if not impressora_combobox['values']:
@@ -99,21 +111,27 @@ def print_passenger_receipt():
         tk.messagebox.showinfo("Erro", "Tente selecionar um passageiro e uma impressora.")
 
 if __name__ == '__main__':
-    SHEET = getSheet(SCOPES, ID_SHEET) # Permitir alteracao durante execucao
-
-    if SHEET is not None:
+    if sheet is not None:
         root = ttk.Window()
         style = ttk.Style()
         
         root.geometry('550x550')
+        root.resizable(False, False)
         root.title("Renotur ")
         root.iconbitmap("iconRenotur.ico")
         root.option_add('*Font', 'Arial 11')
         root.option_add('*background', 'white')
         root.configure(bg='white')
 
+        style.configure("Refresh.TButton", background='white', font=('Arial', 16), foreground='black', borderwidth=0)
+        style.map("Refresh.TButton", background=[('active', 'white')])
+        style.map("Refresh.TButton", foreground=[('active', 'orange')])
+
+        refresh_button = ttk.Button(root, text="⟳", width=0, style="Refresh.TButton", command=refresh_sheet)
+        refresh_button.place(x=540, y=10, anchor=tk.NE)
+
         date_label = tk.Label(root, text="\nInforme a data da viagem:")
-        date_label.pack(pady=10)
+        date_label.pack(pady=0)
 
         date_entry = ttk.DateEntry(root, width=18, bootstyle='warning')
         date_entry.pack(padx=10, pady=10)   
