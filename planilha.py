@@ -33,7 +33,6 @@ def credentials(SCOPES):
                 tk.messagebox.showinfo("Timeout", "Tempo limite de autenticação atingido. O programa será encerrado.")
                 sys.exit()
 
-            
             with open('token.json', 'w') as token:
                 token.write(creds.to_json())
 
@@ -55,27 +54,7 @@ def getSheet(SCOPES, ID_SHEET):
     except:
         if os.path.exists('token.json'):
             os.remove("token.json")      
-            popup_reconectar()
+            tk.messagebox.showinfo("Reconect ao perfil.", "Reconect ao perfil.")
 
-            return getSheet(SCOPES, ID_SHEET)
+            getSheet(SCOPES, ID_SHEET)
         
-def popup_reconectar(root=None):
-    popup = tk.Tk()
-
-    popup.geometry('200x125')
-    popup.title("Reconectando")
-    popup.iconbitmap("iconRenotur.ico")
-    popup.option_add('*Font', 'Arial 11')
-    popup.option_add('*background', 'white')
-    popup.configure(bg='white')
-    
-
-    # Adicionar uma label e um botão "OK" à janela
-    label = tk.Label(popup, font=("Arial", 11), text="Reconect ao perfil.")
-    label.pack(padx=20, pady=20)
-
-    ok_button = tk.Button(popup, text="OK", font=("Arial", 11), background='#f8ac4c', relief=tk.GROOVE, bd=0, width=10, command=popup.destroy)
-    ok_button.pack(pady=10)
-
-    popup.wait_window()
-

@@ -40,7 +40,8 @@ def create_doc(line):
             "MG-ID.IDI.DID": line[4],
             "FFFF": line[10],
             "FFFF": line[10],
-            "EEEEE": line[7]
+            "EEEEE": line[7],
+            "OOOO": line[1],
         }
 
         for paragrafo in comprovante.paragraphs:
